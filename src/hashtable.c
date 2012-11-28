@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <string.h>
+#include "fnv.h"
 #include "hashtable.h"
 
 void dump_all( void )

@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <sys/epoll.h>
 #include <errno.h>
+#include "core.h"
 
 #define MAXEVENTS 64
 
@@ -91,15 +92,16 @@ create_and_bind (char *port)
   return sfd;
 }
 
-int
-sock_boot (char *port)
+void*
+sock_boot (void *v_options)
 {
   int sfd, s;
   int efd;
   struct epoll_event event;
   struct epoll_event *events;
 
-  sfd = create_and_bind (port);
+  s_options* options = (s_options *) v_options;
+  sfd = create_and_bind (options->port);
   if (sfd == -1)
     abort ();
 

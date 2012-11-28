@@ -1,4 +1,3 @@
-#include "fnv.h"
 
 struct hash_list {
   Fnv32_t hash;
