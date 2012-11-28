@@ -92,20 +92,14 @@ create_and_bind (char *port)
 }
 
 int
-main (int argc, char *argv[])
+sock_boot (char *port)
 {
   int sfd, s;
   int efd;
   struct epoll_event event;
   struct epoll_event *events;
 
-  if (argc != 2)
-    {
-      fprintf (stderr, "Usage: %s [port]\n", argv[0]);
-      exit (EXIT_FAILURE);
-    }
-
-  sfd = create_and_bind (argv[1]);
+  sfd = create_and_bind (port);
   if (sfd == -1)
     abort ();
 
