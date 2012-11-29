@@ -17,10 +17,12 @@ my $sock = new IO::Socket::INET(PeerAddr=>$host,
 
 die "IO::Socket : $!" unless $sock;
 
-my $bytes = sprintf("%08x",bytes::length($buf));
-print $sock $bytes.$buf;
-$sock->flush();
-print <$sock>;
+for(1 .. 2) {
+  my $bytes = sprintf("%08x",bytes::length($buf));
+  print $sock $bytes.$buf."\x0d\x0a";
+  $sock->flush();
+  print <$sock>;
+}
 
 close($sock);
 

@@ -8,6 +8,11 @@
 
 void* event_loop(void* args);
 
+
+char received_data_queue[128][512];
+int received_data_queue_tail = 0;
+int received_data_queue_head = 0;
+
 int main(int argc, char *argv[]) {
   if (argc != 2)
     {
@@ -15,11 +20,12 @@ int main(int argc, char *argv[]) {
       exit (EXIT_FAILURE);
     }
 
+  // queue init
+
   pthread_t thread_sv;
   pthread_t thread_db;
 
   s_options options;
-  printf("%s",argv[1]);
   strncpy(&options.port,argv[1],6);
 
   if (pthread_create(&thread_db,NULL,event_loop,(void *)NULL) != 0) {
@@ -42,7 +48,15 @@ void* event_loop(void* args) {
   while (1) {
   char command[256];
     sprintf( command, "grep VmSize /proc/%d/status", getpid() );
-//      system( command );
+//      system( command ); 
+    int i;
+    for (i=0;i<received_data_queue_tail;++i) {
+      char t;
+      memcpy(&t,&received_data_queue[received_data_queue_head++],512);
+      printf("%d : %d : %s\n",received_data_queue_head,received_data_queue_tail,&t);
+      if (received_data_queue_head>MAX_RECEIVE_QUEUE) received_data_queue_head = 0;
+    }
+    received_data_queue_head = received_data_queue_tail = 0;
     sleep(1);
   }
 }

@@ -71,6 +71,8 @@ create_and_bind (char *port)
       if (sfd == -1)
         continue;
 
+      int yes = 1;
+      setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR,(const char*) &yes,sizeof(yes));
       s = bind (sfd, rp->ai_addr, rp->ai_addrlen);
       if (s == 0)
         {
@@ -244,17 +246,19 @@ sock_boot (void *v_options)
                       break;
                     }
 
-                  /* Write the buffer to standard output */
-                  //s = write (1, buf, count);
-                  char payload_size[9];
-                  memcpy(payload_size,&buf[0],8);
-                  payload_size[8] = '\0';
+                  char c_payload_size[9];
+                  memcpy(c_payload_size,&buf[0],8);
+                  c_payload_size[8] = '\0';
                   char *e;
-                  clients_data[i].payload_size = strtoul(payload_size,&e,16);
-                  strcpy(clients_data[i].buffer,&buf[8]);
+                  unsigned long int payload_size = strtoul(c_payload_size,&e,16);
+                  clients_data[i].payload_size = payload_size;
+                  memcpy(clients_data[i].buffer,&buf[8],payload_size);
+                  memcpy(&received_data_queue[received_data_queue_tail++],&buf[8],payload_size);
+                  if (received_data_queue_tail > MAX_RECEIVE_QUEUE) received_data_queue_tail = 0;
+                  //strcpy(clients_data[i].buffer,&buf[8]);
 #ifdef DEBUG
-                  printf("payload_size:[%s] | ",payload_size);
-                  printf("clients_data[%d].payload_size:[%lu] | ",i,clients_data[i].payload_size);
+                  printf("payload_size:[%d] | ",payload_size);
+                  printf("clients_data[%d].payload_size:[%lu] | ",i,payload_size);
                   printf("clients_data[%d].buffer:[%s]\n",i,clients_data[i].buffer);
 #endif
                   if (s == -1)
