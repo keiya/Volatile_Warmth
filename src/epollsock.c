@@ -13,6 +13,7 @@
 #include <sys/epoll.h>
 #include <errno.h>
 #include "core.h"
+#include "kstring.h"
 
 #define MAXEVENTS 64
 
@@ -253,19 +254,28 @@ sock_boot (void *v_options)
                   unsigned long int payload_size = strtoul(c_payload_size,&e,16);
                   clients_data[i].payload_size = payload_size;
                   memcpy(clients_data[i].buffer,&buf[8],payload_size);
-                  memcpy(&received_data_queue[received_data_queue_tail++],&buf[8],payload_size);
+
+
+                  t_split *directives = ksplit(clients_data[i].buffer,"\x0d\x0a");
+                  int j;
+                  for (j=0; j < directives->count; ++j) {
+
+                  memcpy(&received_data_queue[received_data_queue_tail++],directives->splited_ary[j],payload_size);
                   if (received_data_queue_tail > MAX_RECEIVE_QUEUE) received_data_queue_tail = 0;
                   //strcpy(clients_data[i].buffer,&buf[8]);
 #ifdef DEBUG
-                  printf("payload_size:[%d] | ",payload_size);
-                  printf("clients_data[%d].payload_size:[%lu] | ",i,payload_size);
-                  printf("clients_data[%d].buffer:[%s]\n",i,clients_data[i].buffer);
+                  //printf("payload_size:[%d] | ",payload_size);
+                  //printf("clients_data[%d].payload_size:[%lu] | ",i,payload_size);
+                  printf("clients_data[%d].buffer:[%s]\n",i,directives->splited_ary[j]);
 #endif
+                  }
+/*
                   if (s == -1)
                     {
                       perror ("write");
                       abort ();
                     }
+*/
                 }
 
               if (done)

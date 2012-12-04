@@ -6,7 +6,8 @@ use IO::Socket;
 use bytes();
 
 # test data
-my $buf = 'ajsdifjalksnvzius';
+my $crlf = "\x0d\x0a";
+my $buf = 'ajsdifjalksnvzius'.$crlf.'sdfasdfadsasdfasdf'.$crlf;
 
 my $host = $ARGV[0];
 my $port = $ARGV[1];
@@ -19,7 +20,7 @@ die "IO::Socket : $!" unless $sock;
 
 for(1 .. 2) {
   my $bytes = sprintf("%08x",bytes::length($buf));
-  print $sock $bytes.$buf."\x0d\x0a";
+  print $sock $bytes.$buf.$crlf;
   $sock->flush();
   print <$sock>;
 }

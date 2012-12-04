@@ -1,14 +1,16 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "kstring.h"
 
 /*
  * kstring by Keiya Chinen
  * 1.0a
  * */
 
-char** ksplit(char *text,char *delim) {
+t_split* ksplit(char *text,char *delim) {
   char **splited_ary;
+  t_split *result;
   char *chop_begin,*chop_end;
   char *offset = text;
 
@@ -25,12 +27,15 @@ char** ksplit(char *text,char *delim) {
     char *part = malloc(chop_length);
     strncpy(part,offset,chop_length);
 
-    splited_ary[i] = (char *)malloc(sizeof(part));
+    splited_ary[i] = (char *)malloc(strlen(part));
 
     strcpy(splited_ary[i],part);
 
     offset = chop_end;
     ++i;
   }
-    return splited_ary;
+  result = (t_split *)malloc(sizeof(t_split *));
+  result->splited_ary = splited_ary;
+  result->count = i;
+  return result;
 }
