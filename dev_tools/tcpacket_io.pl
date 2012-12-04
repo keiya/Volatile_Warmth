@@ -7,7 +7,9 @@ use bytes();
 
 # test data
 my $crlf = "\x0d\x0a";
-my $buf = 'ajsdifjalksnvzius'.$crlf.'sdfasdfadsasdfasdf'.$crlf;
+my $buf = 'SET key01 asdf '.$crlf.'GET key01 '.$crlf;
+#my $buf = 'SET key01 asdf ';#.$crlf.'GET key01 '.$crlf;
+#my $buf = 'GET key01 ';
 
 my $host = $ARGV[0];
 my $port = $ARGV[1];

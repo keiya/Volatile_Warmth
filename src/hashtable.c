@@ -9,7 +9,7 @@ void dump_all( void )
 {
   struct hash_list *at = myList[0].next;
   while( at != NULL ) {
-      printf( "data = %lu\n", at->hash );
+      printf( "%lu => %s\n", at->hash ,at->datagram);
       at = at->next;
   }
 }

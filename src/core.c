@@ -5,6 +5,7 @@
 #include "fnv.h"
 #include "hashtable.h"
 #include "core.h"
+#include "kstring.h"
 
 void* event_loop(void* args);
 
@@ -12,6 +13,9 @@ void* event_loop(void* args);
 char received_data_queue[128][512];
 int received_data_queue_tail = 0;
 int received_data_queue_head = 0;
+char send_data_queue[128][512];
+int send_data_queue_tail = 0;
+int send_data_queue_head = 0;
 
 int main(int argc, char *argv[]) {
   if (argc != 2)
@@ -45,18 +49,41 @@ int main(int argc, char *argv[]) {
 }
 
 void* event_loop(void* args) {
+
+  struct hash_list hash;
   while (1) {
   char command[256];
-    sprintf( command, "grep VmSize /proc/%d/status", getpid() );
+//    sprintf( command, "grep VmSize /proc/%d/status", getpid() );
 //      system( command ); 
     int i;
     for (i=0;i<received_data_queue_tail;++i) {
       char t;
       memcpy(&t,&received_data_queue[received_data_queue_head++],512);
+
+      t_split *directives = ksplit(&t," ");
+
+      if      (strcmp(directives->splited_ary[0],"GET") == 0) {
+        char *datagram;
+        *datagram = search(directives->splited_ary[1]);
+
+
+        //memcpy(&send_data_queue[send_data_queue_tail++],datagram,strsize(datagram));
+        strcpy(&send_data_queue[send_data_queue_tail++],datagram);
+        if (send_data_queue_tail > MAX_SEND_QUEUE) send_data_queue_tail = 0;
+      }
+      else if (strcmp(directives->splited_ary[0],"SET") == 0) {
+        create_hashstruct(&hash,directives->splited_ary[1],directives->splited_ary[2]);
+        insert(&hash);
+      }
+      else {
+        printf("purge is not implemented.");
+      }
+      dump_all();
+
       printf("%d : %d : %s\n",received_data_queue_head,received_data_queue_tail,&t);
       if (received_data_queue_head>MAX_RECEIVE_QUEUE) received_data_queue_head = 0;
     }
     received_data_queue_head = received_data_queue_tail = 0;
-    sleep(1);
+    usleep(1);
   }
 }
